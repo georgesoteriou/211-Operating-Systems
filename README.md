@@ -926,5 +926,146 @@ Improve disc access by storing some disk sectors in main memory (buffer)
     - **Triply indirect pointers** $\Rightarrow$ point to one block that has **doubly indirect pointers**
 
 
-35
+## Free space management
+1. Free list
+    - List of free blocks
+    - Choose first empty block to allocate
+    - Freed blocks added to the end of the list
+    - Advantages:
+      - Low overhead
+    - Disadvantages:
+      - Blocks are probably not ordered, so increased access time
+2. Bitmap
+    - contains 1 bit in memory for each disk block
+    - Advantages:
+      - quick to access
+      - also for contiguous blocks
+    - Disadvantages:
+      - need to search entire bitmap
+
+## File System Layout
+
+- boot block
+- superblock
+  - no of inodes
+  - no of data blocks
+  - start of inode & free space bitmap
+  - first data block
+  - block size
+  - maximum file size
+  - ...
+- free inode bitmap
+- free block (zone) bitmap
+- inodes + data
+
+### Directories:
+- Hierarchical file system
+  - **root** is where **root directory** begins
+  - **root directory** has subdirectories
+  - Pathnames
+    - Absolute: from root
+    - Relative: form current working directory
+  - Directory Operations
+    - Open/Close
+    - Search Create/Delete
+    - link
+      - Hard link: Copy inode location to new entry (unix only)  
+      - Symbolic (soft) link: Reference full path file/dir  
+      - Warning: directory traversal might loop and think of file deletion
+    - cd
+    - ls
+    - Read attributes
+    - Write attributes
+    - Mount
+      - Allows reference from single root directory
+      - Mount point: directory in native FS assigned to root of mounted FS
+
+## ext2fs
+High-performance, robust FS with support for
+advanced features
+- Block groups for related data with list of inodes 
+  - Instead of standalone inodes
+
 # Security
+
+## Definitions
+- Data confidentiality
+  - Attack: theft of data
+- Data integrity
+  - Attack: destruction or alteration of data
+- System availability
+  - Attack: denial of service
+- Security policy
+  - **what** is protected
+  - **who** has access 
+  - **what** is permitted
+- Security mechanisms
+  - how to implement security policy
+
+## Goals:
+- Prevent unauthorized access to system
+- Permit authorized sharing of resources
+## Aspects:
+- People security
+  - Insider
+  - Social engineering attacks
+- Hardware security
+  - E.g., steal hard disk to get at data  
+  - inspect network traffic
+- Software security
+  - E.g., exploit bug to become superuser
+  - buffer, integer overflow
+  - string vulnerabilities
+## Access control:
+- Authentication: 
+  - Personal characteristics
+    - Fingerprints
+    - Voiceprints
+    - Retina patterns
+    - Can suffer from expensive equipment cost, false positives
+  - Possessions
+    - RFID or key
+    - May be lost/Impersonation
+  - Passwords
+    - cheep
+    - Directory attack is quite good at breaking this
+    - password reuse will cause security weakness
+    - To make better:
+      - force change regularly 
+    - OS used to store plane text behind privileges
+      - modern os stores hash encryption of password
+      - Use salt to prevent rainbow attack (attackers make a table of password to hash with no salts)
+- Authorisation: 
+  - **who** can access
+  - **what** they can access
+  - **how** they access can (what operations)
+  - Principle of Least Privilege (PoLP)
+    - Give users minimum right required
+  - **Protection Domains**
+    - Access right is 
+      - a set of objects
+      - with operations permitted on them
+      - A **Principal (user,group,..)** in a domain follows its access rights
+  - **Access Control Matrix**
+    - Specifies **authorisation policy** (table)
+      - Rows represent principals (user. group, ...)
+      - Columns represent target objects (file, device, ...)
+    - How to implement:
+      - Access-Control Lists (ACLs)
+        - Store for each object, the principals that can access it
+      - Capabilities
+        - Is a key that refers to an object that has associated access rights
+        - Principals must use a capability to access anything
+      - vs
+        - Principle of least privilege: + capabilities
+        - Revocation: + ACLs
+        - Rights transfer: + capabilities
+        - Persistence: + ACLs
+
+## Discretionary vs mandatory access control
+- Discretionary
+  - Principals determine who may access their objects
+- Mandatory
+  - Precise system rules that determine access to objects
+
+## “Security through obscurity” is usually bad idea
